@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>雪花</title>
+  <title>大雪纷飞</title>
   <style>
     html,
     body {
@@ -24,10 +24,12 @@
 <body>
   <canvas id="canvas"></canvas>
   <script>
-    const SIDE_NUM = 6;
-    const SNOW_NUM = 100;
+    const SIDE_NUM = 6;  // 雪花形状（正N边形）
+    const SNOW_NUM = 100;  // 雪花总数量
     const _WIDTH = window.innerWidth;
     const _HEIGHT = window.innerHeight;
+    const MAX = 7;
+    const TIME = 30;
     const cos = Math.cos;
     const sin = Math.sin;
     const PI = Math.PI;
@@ -41,7 +43,8 @@
       init() {
         this.x = random(0, _WIDTH);
         this.y = 0;
-        this.r = random(5, 15);
+        this.r = random(2, 12);
+        this._x = random(0.1, 2);
         this._y = random(3, 5);
         this.snowCanvas = drawCanvas(this.r)
       },
@@ -52,6 +55,11 @@
       update() {
         if (this.y < _HEIGHT - this.r) {
           this.y += this._y;
+          if (this.x < _WIDTH - this.r) {
+            this.x += this._x;            
+          } else {
+            this.init();
+          }
         } else {
           this.init();
         }
@@ -77,7 +85,7 @@
           const snow = new Snow();
           snow.init();
           snows.push(snow);
-        }, 20 * i);
+        }, TIME * i);
       }
       move();
     }
@@ -91,7 +99,7 @@
 
       let coords = drawSnow(ctxSnow, coord, size);
       coords = drawSnow(ctxSnow, coords, size / 2.5);
-      size > 10 && drawSnow(ctxSnow, coords, size / 6);
+      size > MAX && drawSnow(ctxSnow, coords, size / 6);
       return canvasSnow;
     }
 
