@@ -25,11 +25,11 @@
   <canvas id="canvas"></canvas>
   <script>
     const SIDE_NUM = 6;  // 雪花形状（正N边形）
-    const SNOW_NUM = 100;  // 雪花总数量
+    const SNOW_NUM = 80;  // 雪花总数量
+    const THRESHOLD = 7;  // 显示第三层棱角的阈值
+    const TIME = 30;  // 雪花出现时间间隔
     const _WIDTH = window.innerWidth;
     const _HEIGHT = window.innerHeight;
-    const MAX = 7;
-    const TIME = 30;
     const cos = Math.cos;
     const sin = Math.sin;
     const PI = Math.PI;
@@ -80,6 +80,7 @@
     }
 
     function drawSnows() {
+      snows = [];
       for (let i = 0; i < SNOW_NUM; i += 1) {
         setTimeout(function () {
           const snow = new Snow();
@@ -99,7 +100,7 @@
 
       let coords = drawSnow(ctxSnow, coord, size);
       coords = drawSnow(ctxSnow, coords, size / 2.5);
-      size > MAX && drawSnow(ctxSnow, coords, size / 6);
+      size > THRESHOLD && drawSnow(ctxSnow, coords, size / 6);
       return canvasSnow;
     }
 
