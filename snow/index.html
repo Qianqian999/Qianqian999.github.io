@@ -38,15 +38,20 @@
     let snows = [];
     let snow;
 
+    window.addEventListener('resize', drawSnows);
+    window.onload = function () {
+      initCanvas();
+      drawSnows();
+    }
+
     const Snow = function () {};
     Snow.prototype = {
       init(x = random(0, _WIDTH), y = 0) {
         this.x = x;
         this.y = y;
         this.r = random(2, 12);
-        this._x = random(0.1, 2);
+        this._x = random(0.2, 2);
         this._y = random(3, 5);
-        this.snowCanvas = drawCanvas(this.r)
       },
       draw() {
         ctx.drawImage(this.snowCanvas, this.x, this.y)
@@ -66,12 +71,6 @@
       }
     };
 
-    window.addEventListener('resize', drawSnows);
-    window.onload = function () {
-      initCanvas();
-      drawSnows();
-    }
-
     function initCanvas() {
       canvas = document.getElementById('canvas');
       canvas.setAttribute('width', _WIDTH);
@@ -85,6 +84,7 @@
         setTimeout(function () {
           const snow = new Snow();
           snow.init();
+          snow.snowCanvas = drawCanvas(snow.r);
           snows.push(snow);
         }, TIME * i);
       }
@@ -98,9 +98,14 @@
       canvasSnow.setAttribute('height', coord[0][1] + size * 2);
       const ctxSnow = canvasSnow.getContext('2d');
 
+      ctxSnow.save();
+      ctxSnow.strokeStyle = '#FFFFFF';
+      ctxSnow.lineWidth = 2;
       let coords = drawSnow(ctxSnow, coord, size);
+      ctxSnow.lineWidth = 1.2;
       coords = drawSnow(ctxSnow, coords, size / 2.5);
       size > THRESHOLD && drawSnow(ctxSnow, coords, size / 6);
+      ctxSnow.restore();
       return canvasSnow;
     }
 
@@ -116,22 +121,17 @@
     }
 
     function drawSide(ctxSnow, x, y, size, radian) {
-      ctxSnow.save();
       const x2 = size * cos(radian) + x;
       const y2 = size * sin(radian) + y;
       drawLine(ctxSnow, x, y, x2, y2);
-      ctxSnow.restore();
       return { x2, y2 };
     }
 
-    function drawLine(ctxSnow, x1, y1, x2, y2, color = "#fff") {
-      ctxSnow.save();
+    function drawLine(ctxSnow, x1, y1, x2, y2) {
       ctxSnow.beginPath();
-      ctxSnow.strokeStyle = color;
       ctxSnow.lineTo(x1, y1);
       ctxSnow.lineTo(x2, y2);
       ctxSnow.stroke();
-      ctxSnow.restore();
     }
 
     function move() {
