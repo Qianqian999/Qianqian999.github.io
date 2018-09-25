@@ -40,9 +40,9 @@
 
     const Snow = function () {};
     Snow.prototype = {
-      init() {
-        this.x = random(0, _WIDTH);
-        this.y = 0;
+      init(x = random(0, _WIDTH), y = 0) {
+        this.x = x;
+        this.y = y;
         this.r = random(2, 12);
         this._x = random(0.1, 2);
         this._y = random(3, 5);
@@ -58,7 +58,7 @@
           if (this.x < _WIDTH - this.r) {
             this.x += this._x;            
           } else {
-            this.init();
+            this.init(0, this.y);
           }
         } else {
           this.init();
