@@ -1,0 +1,143 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>雪花</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    body {
+      overflow: hidden;
+      background-color: #000;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canvas"></canvas>
+  <script>
+    const SIDE_NUM = 6;
+    const SNOW_NUM = 100;
+    const _WIDTH = window.innerWidth;
+    const _HEIGHT = window.innerHeight;
+    const cos = Math.cos;
+    const sin = Math.sin;
+    const PI = Math.PI;
+    let canvas;
+    let ctx;
+    let snows = [];
+    let snow;
+
+    const Snow = function () {};
+    Snow.prototype = {
+      init() {
+        this.x = random(0, _WIDTH);
+        this.y = 0;
+        this.r = random(5, 15);
+        this._y = random(3, 5);
+        this.snowCanvas = drawCanvas(this.r)
+      },
+      draw() {
+        ctx.drawImage(this.snowCanvas, this.x, this.y)
+        this.update();
+      },
+      update() {
+        if (this.y < _HEIGHT - this.r) {
+          this.y += this._y;
+        } else {
+          this.init();
+        }
+      }
+    };
+
+    window.addEventListener('resize', drawSnows);
+    window.onload = function () {
+      initCanvas();
+      drawSnows();
+    }
+
+    function initCanvas() {
+      canvas = document.getElementById('canvas');
+      canvas.setAttribute('width', _WIDTH);
+      canvas.setAttribute('height', _HEIGHT);
+      ctx = canvas.getContext('2d');
+    }
+
+    function drawSnows() {
+      for (let i = 0; i < SNOW_NUM; i += 1) {
+        setTimeout(function () {
+          const snow = new Snow();
+          snow.init();
+          snows.push(snow);
+        }, 20 * i);
+      }
+      move();
+    }
+
+    function drawCanvas(size) {
+      let coord = [[2 * size, 2 * size]];
+      const canvasSnow = document.createElement('canvas');
+      canvasSnow.setAttribute('width', coord[0][0] + size * 2);
+      canvasSnow.setAttribute('height', coord[0][1] + size * 2);
+      const ctxSnow = canvasSnow.getContext('2d');
+
+      let coords = drawSnow(ctxSnow, coord, size);
+      coords = drawSnow(ctxSnow, coords, size / 2.5);
+      size > 10 && drawSnow(ctxSnow, coords, size / 6);
+      return canvasSnow;
+    }
+
+    function drawSnow(ctxSnow, coord, size) {
+      const coords = [];
+      for (let i = 0, length = coord.length; i < length; i += 1) {
+        for (let j = 0; j < SIDE_NUM; j += 1) {
+          const { x2, y2 } = drawSide(ctxSnow, coord[i][0], coord[i][1], size, 2 * PI * (j / SIDE_NUM));
+          coords.push([x2, y2]);
+        }
+      }
+      return coords;
+    }
+
+    function drawSide(ctxSnow, x, y, size, radian) {
+      ctxSnow.save();
+      const x2 = size * cos(radian) + x;
+      const y2 = size * sin(radian) + y;
+      drawLine(ctxSnow, x, y, x2, y2);
+      ctxSnow.restore();
+      return { x2, y2 };
+    }
+
+    function drawLine(ctxSnow, x1, y1, x2, y2, color = "#fff") {
+      ctxSnow.save();
+      ctxSnow.beginPath();
+      ctxSnow.strokeStyle = color;
+      ctxSnow.lineTo(x1, y1);
+      ctxSnow.lineTo(x2, y2);
+      ctxSnow.stroke();
+      ctxSnow.restore();
+    }
+
+    function move() {
+      ctx.clearRect(0, 0, _WIDTH, _HEIGHT);
+      let length = snows.length;
+      for (let i = 0; i < length; i++) {
+        snows[i].draw();
+      }
+      requestAnimationFrame(move);
+    }
+
+    function random(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+  </script>
+</body>
+
+</html>
