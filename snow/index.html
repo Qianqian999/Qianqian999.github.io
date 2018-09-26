@@ -22,29 +22,36 @@
 </head>
 
 <body>
+  <input type="range" min="10" max="200" id="range">
   <canvas id="canvas"></canvas>
   <script>
-    const SIDE_NUM = 6;  // 雪花形状（正N边形）
-    const SNOW_NUM = 80;  // 雪花总数量
-    const THRESHOLD = 7;  // 显示第三层棱角的阈值
-    const TIME = 30;  // 雪花出现时间间隔
-    const _WIDTH = window.innerWidth;
-    const _HEIGHT = window.innerHeight;
     const cos = Math.cos;
     const sin = Math.sin;
     const PI = Math.PI;
+    const SIDE_NUM = 6;  // 雪花形状（正N边形）
+    const THRESHOLD = 7;  // 显示第三层棱角的阈值
+    let snowCount = 100;  // 雪花总数量
+    let _WIDTH = window.innerWidth;  // 设备窗口宽度
+    let _HEIGHT = window.innerHeight;  // 设备窗口高度
+    let space = ~~(_HEIGHT / 4 * 16.6 / snowCount);  // 雪花出现时间间隔
+    let snows = [];  // 存放雪花的数组
+    let snow;  // 单个雪花
+    let timeouts = []; // 雪花的定时器数组
     let canvas;
     let ctx;
-    let snows = [];
-    let snow;
 
-    window.addEventListener('resize', drawSnows);
-    window.onload = function () {
+    window.addEventListener('resize', () => {
       initCanvas();
       drawSnows();
+    });
+    window.onload = function () {
+      initEvents();
+      initCanvas();
+      drawSnows();
+      move();
     }
 
-    const Snow = function () {};
+    const Snow = function () { };
     Snow.prototype = {
       init(x = random(0, _WIDTH), y = 0) {
         this.x = x;
@@ -61,7 +68,7 @@
         if (this.y < _HEIGHT - this.r) {
           this.y += this._y;
           if (this.x < _WIDTH - this.r) {
-            this.x += this._x;            
+            this.x += this._x;
           } else {
             this.init(0, this.y);
           }
@@ -71,7 +78,19 @@
       }
     };
 
+    function initEvents() {
+      const range = document.getElementById('range');
+      range.onchange = function () {
+        timeouts.forEach(t => clearTimeout(t));
+        snowCount = this.value;
+        space = ~~(_HEIGHT / 4 * 16.6 / snowCount)
+        drawSnows();
+      }
+    }
+
     function initCanvas() {
+      _WIDTH = window.innerWidth;
+      _HEIGHT = window.innerHeight;
       canvas = document.getElementById('canvas');
       canvas.setAttribute('width', _WIDTH);
       canvas.setAttribute('height', _HEIGHT);
@@ -79,16 +98,17 @@
     }
 
     function drawSnows() {
-      snows = [];
-      for (let i = 0; i < SNOW_NUM; i += 1) {
-        setTimeout(function () {
+      snows = snows.slice(0, snowCount);
+      timeouts = [];
+      for (let i = snows.length; i < snowCount; i += 1) {
+        let timeout = setTimeout(function () {
           const snow = new Snow();
           snow.init();
           snow.snowCanvas = drawCanvas(snow.r);
           snows.push(snow);
-        }, TIME * i);
+        }, space * i);
+        timeouts.push(timeout);
       }
-      move();
     }
 
     function drawCanvas(size) {
@@ -102,7 +122,7 @@
       ctxSnow.strokeStyle = '#FFFFFF';
       ctxSnow.lineWidth = 2;
       let coords = drawSnow(ctxSnow, coord, size);
-      ctxSnow.lineWidth = 1.2;
+      ctxSnow.lineWidth = 1;
       coords = drawSnow(ctxSnow, coords, size / 2.5);
       size > THRESHOLD && drawSnow(ctxSnow, coords, size / 6);
       ctxSnow.restore();
