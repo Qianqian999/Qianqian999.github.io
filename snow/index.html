@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
-  <title>雪，好美的雪 ε=ε=ε=(~￣▽￣)~</title>
+  <title>❄故宫的雪❄</title>
   <style>
     html,
     body {
@@ -19,19 +19,39 @@
     body {
       overflow: hidden;
       background-color: #000;
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      -moz-background-size: 100% 100%;
+    }
+
+    #range {
+      position: absolute;
+      right: 0;
+      transform: rotate(-90deg) translate(-55%, 30px);
+      -webkit-transform: rotate(-90deg) translate(-55%, 30px);
+    }
+
+    #showSun {
+      position: absolute;
+      right: 0;
+    }
+
+    #sun {
+      position: absolute;
     }
   </style>
 </head>
 
 <body>
   <input type="range" min="10" max="200" id="range">
+  <button id="showSun">点击出太阳</button>
+  <img id="sun" src="./sun.png" alt="..." style="display: none;">
   <canvas id="canvas"></canvas>
   <script>
     const cos = Math.cos;
     const sin = Math.sin;
     const PI = Math.PI;
     const SIDE_NUM = 6;  // 雪花形状（正N边形）
-    const THRESHOLD = 7;  // 显示第三层棱角的阈值
     let snowCount = 100;  // 雪花总数量
     let _WIDTH = window.innerWidth;  // 设备窗口宽度
     let _HEIGHT = window.innerHeight;  // 设备窗口高度
@@ -39,9 +59,13 @@
     let snows = [];  // 存放雪花的数组
     let snow;  // 单个雪花
     let timeouts = []; // 雪花的定时器数组
+    let minSize = 4;
+    let maxSize = 12;
+    let threshold = 8;  // 显示第三层棱角的阈值
     let canvas;
     let ctx;
 
+    initDom();
     window.addEventListener('resize', () => {
       initCanvas();
       drawSnows();
@@ -58,9 +82,9 @@
       init(x = random(0, _WIDTH), y = 0) {
         this.x = x;
         this.y = y;
-        this.r = random(2, 12);
+        this.r = random(minSize, maxSize);
         this._x = random(0.2, 2);
-        this._y = random(3, 5);
+        this._y = random(2, 4);
       },
       draw() {
         ctx.drawImage(this.snowCanvas, this.x, this.y)
@@ -80,6 +104,18 @@
       }
     };
 
+    function initDom() {
+      const isMobile = /Mobile/gi.test(navigator.userAgent);
+      let img = 'url(./pc.jpg)';
+      if (isMobile) {
+        img = 'url(./mobile.jpg)';
+        minSize = 2;
+        maxSize = 8;
+        threshold = 5;
+      }
+      document.body.style.backgroundImage = img;
+    }
+
     function initEvents() {
       const range = document.getElementById('range');
       range.onchange = function () {
@@ -87,6 +123,19 @@
         snowCount = this.value;
         space = ~~(_HEIGHT / 4 * 16.6 / snowCount)
         drawSnows();
+      }
+      const showSun = document.getElementById('showSun');
+      let bool = true;
+      showSun.onclick = function () {
+        const sun = document.getElementById('sun');
+        if (bool) {
+          sun.style.display = "inline-block";
+          this.innerText = "点击没太阳";
+        } else {
+          sun.style.display = "none";
+          this.innerText = "点击出太阳";
+        }
+        bool = !bool;
       }
     }
 
@@ -126,7 +175,7 @@
       let coords = drawSnow(ctxSnow, coord, size);
       ctxSnow.lineWidth = 1;
       coords = drawSnow(ctxSnow, coords, size / 2.5);
-      size > THRESHOLD && drawSnow(ctxSnow, coords, size / 6);
+      size > threshold && drawSnow(ctxSnow, coords, size / 6);
       ctxSnow.restore();
       return canvasSnow;
     }
