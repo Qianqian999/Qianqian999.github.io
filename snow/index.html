@@ -62,11 +62,21 @@
 <body>
   <div class="operation">
     <input id="range" class="end" type="range" min="10" max="200">
-    <button id="showSun" class="end"><i class="iconfont icon-sun"></i></button>
-    <button id="addSideNum" class="noend"><i class="iconfont icon-snow_2"></i></button>
-    <button id="reduceSideNum" class="end"><i class="iconfont icon-snow_1"></i></button>
-    <button id="addSnowSize" class="noend"><i class="iconfont icon-hands_zoom"></i></button>
-    <button id="reduceSnowSize" class="end"><i class="iconfont icon-hands_zoom_"></i></button>
+    <button id="showSun" class="end">
+      <i class="iconfont icon-sun"></i>
+    </button>
+    <button id="addSideNum" class="noend">
+      <i class="iconfont icon-snow_2"></i>
+    </button>
+    <button id="reduceSideNum" class="end">
+      <i class="iconfont icon-snow_1"></i>
+    </button>
+    <button id="addSnowSize" class="noend">
+      <i class="iconfont icon-hands_zoom"></i>
+    </button>
+    <button id="reduceSnowSize" class="end">
+      <i class="iconfont icon-hands_zoom_"></i>
+    </button>
   </div>
   <img id="sun" src="./sun.png" alt="..." style="display: none;">
   <canvas id="canvas"></canvas>
@@ -108,9 +118,16 @@
         this.r = random(...snowSize);
         this._x = random(0.2, 2);
         this._y = random(...speed);
+        this.rotateSpeed = this._y / 2;
+        this.angle = 0;
       },
       draw() {
-        ctx.drawImage(this.snowCanvas, this.x, this.y)
+        // ctx.drawImage(this.snowCanvas, this.x, this.y)
+        ctx.save()
+        ctx.translate(this.x + this.snowCanvas.width / 2, this.y + this.snowCanvas.height / 2)
+        ctx.rotate(this.angle % 360 * PI / 180)
+        ctx.drawImage(this.snowCanvas, -this.snowCanvas.width / 2, -this.snowCanvas.height / 2);
+        ctx.restore()
         this.update();
       },
       update() {
@@ -124,6 +141,7 @@
         } else {
           this.init();
         }
+        this.angle += this.rotateSpeed;
       }
     };
 
